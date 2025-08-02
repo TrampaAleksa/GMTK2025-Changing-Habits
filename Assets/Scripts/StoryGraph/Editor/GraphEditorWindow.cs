@@ -17,22 +17,18 @@ public class GraphEditorWindow : EditorWindow
     private void OnGUI()
     {
         state.Graph = (GraphData)EditorGUILayout.ObjectField("Graph", state.Graph, typeof(GraphData), false);
-
         if (state.Graph == null)
             return;
 
         viewHandler.HandleViewEvents(Event.current, state);
 
-        Matrix4x4 oldMatrix = viewHandler.BeginView(state);
+        renderer.DrawConnections(viewHandler, state);
+        renderer.DrawNodes(viewHandler, state);
 
-        renderer.DrawConnections(state);
-        renderer.DrawNodes(state);
-
-        viewHandler.EndView(oldMatrix);
-
-        interaction.ProcessEvents(Event.current, state, renderer, position.size);
+        interaction.ProcessEvents(viewHandler, Event.current, state, renderer, position.size);
 
         if (GUI.changed)
             Repaint();
     }
+
 }

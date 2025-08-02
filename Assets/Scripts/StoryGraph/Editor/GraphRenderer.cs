@@ -3,11 +3,14 @@ using UnityEngine;
 
 public class GraphRenderer
 {
-    private const float NodeWidth = 260f;
-    private const float NodeHeight = 70f;
+    private const float NodeBaseWidth = 280f;
 
-    public void DrawConnections(GraphEditorState state)
+    private GraphViewHandler _viewHandler;
+
+    public void DrawConnections(GraphViewHandler viewHandler, GraphEditorState state)
     {
+        _viewHandler = viewHandler;
+        
         foreach (var node in state.Graph.Nodes)
         {
             foreach (var conn in node.Connections)
@@ -17,77 +20,63 @@ public class GraphRenderer
 
                 Handles.color = GetConnectionColor(conn.Target);
 
-                Vector2 start = GetNodeCenter(node, state);
-                Vector2 end = GetNodeCenter(conn.Target, state);
+                Vector2 start = GetNodeCenterScreen(node, state);
+                Vector2 end = GetNodeCenterScreen(conn.Target, state);
 
                 Handles.DrawLine(start, end);
             }
         }
-        
-        // Reset color after drawing
+
         Handles.color = Color.white;
     }
 
-
-
-    public void DrawNodes(GraphEditorState state)
+    public void DrawNodes(GraphViewHandler viewHandler, GraphEditorState state)
     {
+        _viewHandler = viewHandler;
         foreach (var node in state.Graph.Nodes)
         {
             float contentHeight = CalculateNodeHeight(node);
-            var rect = new Rect(
-                node.Position,
-                new Vector2(NodeWidth, contentHeight)
-            );
+
+            Vector2 drawPos = _viewHandler.GraphToScreen(node.Position, state);
+            Vector2 drawSize = new Vector2(NodeBaseWidth, contentHeight) * state.Zoom;
+
+            var rect = new Rect(drawPos, drawSize);
 
             DrawNodeBackground(rect, node);
 
-            GUILayout.BeginArea(rect);
-            DrawNodeContents(node, state.Graph);
-            GUILayout.EndArea();
+            GUI.BeginGroup(rect);
+            DrawNodeContentsManual(node, state.Graph, rect, state.Zoom);
+            GUI.EndGroup();
         }
     }
-    
-    private const float BackgroundPadding = 10f;
 
     private void DrawNodeBackground(Rect rect, GraphNodeData node)
     {
-        var backgroundRect = new Rect(
-            rect.x - BackgroundPadding,
-            rect.y - BackgroundPadding,
-            rect.width + 2 * BackgroundPadding,
-            rect.height + 2 * BackgroundPadding
-        );
-
         Color fillColor = GetNodeColor(node.Phase);
-        Color outlineColor = Color.black;
+        Color outlineColor = fillColor * 0.7f;
+        outlineColor.a = 1f;
 
-        Handles.DrawSolidRectangleWithOutline(backgroundRect, fillColor, outlineColor);
-
-        // Draw Uniy's GUI.Box (kept for border & style)
-        GUI.Box(rect, GUIContent.none);
+        Handles.DrawSolidRectangleWithOutline(rect, fillColor, outlineColor);
     }
 
-
-    private void DrawNodeContents(GraphNodeData node, GraphData graph)
+    private void DrawNodeContentsManual(GraphNodeData node, GraphData graph, Rect rect, float zoom)
     {
-        DrawNodeIdField(node, graph);
-        DrawNodePhaseField(node, graph);
-        DrawNodeTypeField(node, graph);  
-        DrawNodeScenePrefabField(node, graph);  
-        DrawNodeConnections(node);
-    }
+        // scale font sizes slightly with zoom
+        float scale = Mathf.Clamp(zoom, 0.75f, 2f);
+        float y = 5f;
+        float padding = 5f;
+        float fieldHeight = 20f * scale;
+        float fullWidth = rect.width - 2 * padding;
 
-    private void DrawNodeIdField(GraphNodeData node, GraphData graph)
-    {
-        var style = new GUIStyle(EditorStyles.textField)
+        var idStyle = new GUIStyle(EditorStyles.textField)
         {
-            fontSize = 20,
+            fontSize = Mathf.RoundToInt(20 * scale),
             fontStyle = FontStyle.Bold
         };
 
+        // ID
         EditorGUI.BeginChangeCheck();
-        string newId = EditorGUILayout.TextField(node.Id, style, GUILayout.Height(24));
+        string newId = EditorGUI.TextField(new Rect(padding, y, fullWidth, 24 * scale), node.Id, idStyle);
         if (EditorGUI.EndChangeCheck())
         {
             Undo.RecordObject(node, "Rename Node");
@@ -96,13 +85,11 @@ public class GraphRenderer
             EditorUtility.SetDirty(node);
             EditorUtility.SetDirty(graph);
         }
-    }
+        y += 28 * scale;
 
-
-    private void DrawNodePhaseField(GraphNodeData node, GraphData graph)
-    {
+        // Phase
         EditorGUI.BeginChangeCheck();
-        var newPhase = (TimeOfDayPhase)EditorGUILayout.EnumPopup(node.Phase);
+        var newPhase = (TimeOfDayPhase)EditorGUI.EnumPopup(new Rect(padding, y, fullWidth, fieldHeight), node.Phase);
         if (EditorGUI.EndChangeCheck())
         {
             Undo.RecordObject(node, "Change Phase");
@@ -110,12 +97,11 @@ public class GraphRenderer
             EditorUtility.SetDirty(node);
             EditorUtility.SetDirty(graph);
         }
-    }
-    
-    private void DrawNodeTypeField(GraphNodeData node, GraphData graph)
-    {
+        y += fieldHeight + 4;
+
+        // Type
         EditorGUI.BeginChangeCheck();
-        var newType = (GraphNodeType)EditorGUILayout.EnumPopup(node.Type);
+        var newType = (GraphNodeType)EditorGUI.EnumPopup(new Rect(padding, y, fullWidth, fieldHeight), node.Type);
         if (EditorGUI.EndChangeCheck())
         {
             Undo.RecordObject(node, "Change Node Type");
@@ -123,108 +109,90 @@ public class GraphRenderer
             EditorUtility.SetDirty(node);
             EditorUtility.SetDirty(graph);
         }
-    }
+        y += fieldHeight + 6;
 
-    private void DrawNodeScenePrefabField(GraphNodeData node, GraphData graph)
-    {
-        GUILayout.Space(4);
+        // Scene prefab header
+        EditorGUI.LabelField(new Rect(padding, y, fullWidth, fieldHeight), "Scene Prefab", EditorStyles.boldLabel);
+        y += fieldHeight + 2;
 
-        using (new GUILayout.VerticalScope("box"))
+        // Scene prefab label + button
+        string prefabName = node.StoryScenePrefab != null ? node.StoryScenePrefab.name : "< None >";
+        float buttonWidth = 70f * scale;
+        EditorGUI.LabelField(new Rect(padding, y, fullWidth - buttonWidth - 5, fieldHeight), prefabName, EditorStyles.helpBox);
+
+        if (GUI.Button(new Rect(rect.width - buttonWidth - padding, y, buttonWidth, fieldHeight), "Select"))
         {
-            EditorGUILayout.LabelField("Scene Prefab", EditorStyles.boldLabel);
-            GUILayout.Space(2);
-            EditorGUILayout.BeginHorizontal();
-
-            GUIStyle labelStyle = new GUIStyle(EditorStyles.helpBox)
+            StoryScenePickerWindow.Show(selected =>
             {
-                alignment = TextAnchor.MiddleLeft,
-                fontStyle = FontStyle.Italic
-            };
-
-            string label = node.StoryScenePrefab != null ? node.StoryScenePrefab.name : "< None >";
-            EditorGUILayout.LabelField(label, labelStyle, GUILayout.Height(22));
-
-            if (GUILayout.Button("Select", GUILayout.Width(70), GUILayout.Height(22)))
-            {
-                StoryScenePickerWindow.Show(selected =>
-                {
-                    Undo.RecordObject(node, "Assign Scene Prefab");
-                    node.StoryScenePrefab = selected;
-                    EditorUtility.SetDirty(node);
-                    EditorUtility.SetDirty(graph);
-                });
-            }
-
-            EditorGUILayout.EndHorizontal();
+                Undo.RecordObject(node, "Assign Scene Prefab");
+                node.StoryScenePrefab = selected;
+                EditorUtility.SetDirty(node);
+                EditorUtility.SetDirty(graph);
+            });
         }
-        GUILayout.Space(4);
-    }
+        y += fieldHeight + 8;
 
-
-
-    private void DrawNodeConnections(GraphNodeData node)
-    {
+        // Connections
         for (int c = node.Connections.Count - 1; c >= 0; c--)
         {
             var conn = node.Connections[c];
-            GUILayout.BeginHorizontal();
-            GUILayout.Label(conn.Target != null ? conn.Target.Id : "Missing", GUILayout.Width(80));
-            if (GUILayout.Button("x", GUILayout.Width(20)))
+            string label = conn.Target != null ? conn.Target.Id : "Missing";
+
+            Rect labelRect = new Rect(padding, y, fullWidth - 25, fieldHeight);
+            EditorGUI.LabelField(labelRect, label);
+
+            Rect buttonRect = new Rect(rect.width - 25, y, 20, fieldHeight);
+            if (GUI.Button(buttonRect, "x"))
             {
                 Undo.RecordObject(node, "Remove Connection");
                 node.Connections.RemoveAt(c);
                 EditorUtility.SetDirty(node);
             }
-            GUILayout.EndHorizontal();
+            y += fieldHeight + 2;
         }
     }
-
 
     public Rect GetNodeRect(GraphNodeData node, GraphEditorState state)
     {
         float contentHeight = CalculateNodeHeight(node);
-        return new Rect(node.Position, new Vector2(NodeWidth, contentHeight));
+        Vector2 pos = _viewHandler.GraphToScreen(node.Position, state);
+        Vector2 size = new Vector2(NodeBaseWidth, contentHeight) * state.Zoom;
+        return new Rect(pos, size);
     }
 
-    public Vector2 GetNodeCenter(GraphNodeData node, GraphEditorState state)
+    public Vector2 GetNodeCenterScreen(GraphNodeData node, GraphEditorState state)
     {
         float contentHeight = CalculateNodeHeight(node);
-        return node.Position + new Vector2(NodeWidth / 2, contentHeight / 2);
+        Vector2 size = new Vector2(NodeBaseWidth, contentHeight);
+        return _viewHandler.GraphToScreen(node.Position + size / 2, state);
     }
 
-    
     private float CalculateNodeHeight(GraphNodeData node)
     {
-        float lineHeight = EditorGUIUtility.singleLineHeight + 2f;
+        float lineHeight = 22f;
         float height = 0f;
 
-        // ID field
+        height += 28;
+        height += lineHeight;
+        height += lineHeight;
         height += lineHeight * 2;
-        // Phase field
-        height += lineHeight;
-        // Type field
-        height += lineHeight;
-        // Story Scene field
-        height += lineHeight * 3;
-        // Connections
         height += node.Connections.Count * lineHeight;
-        // Padding at bottom
         height += 20f;
 
         return height;
     }
-    
+
     private Color GetNodeColor(TimeOfDayPhase phase)
     {
         switch (phase)
         {
-            case TimeOfDayPhase.Dawn:    return new Color(0.9f, 0.7f, 0.3f, 1f);
+            case TimeOfDayPhase.Dawn: return new Color(0.9f, 0.7f, 0.3f, 1f);
             case TimeOfDayPhase.Morning: return new Color(0.5f, 0.8f, 1f, 1f);
-            case TimeOfDayPhase.Noon:    return new Color(0.9f, 0.9f, 0.5f, 1f);
+            case TimeOfDayPhase.Noon: return new Color(0.9f, 0.9f, 0.5f, 1f);
             case TimeOfDayPhase.Afternoon: return new Color(0.9f, 0.6f, 0.4f, 1f);
             case TimeOfDayPhase.Evening: return new Color(0.7f, 0.5f, 0.8f, 1f);
-            case TimeOfDayPhase.Night:   return new Color(0.3f, 0.3f, 0.7f, 1f);
-            default:                     return new Color(0.4f, 0.4f, 0.4f, 1f);
+            case TimeOfDayPhase.Night: return new Color(0.3f, 0.3f, 0.7f, 1f);
+            default: return new Color(0.4f, 0.4f, 0.4f, 1f);
         }
     }
 
@@ -233,13 +201,11 @@ public class GraphRenderer
         switch (targetNode.Type)
         {
             case GraphNodeType.Main:
-                return new Color(0.2f, 1f, 0.2f, 1f); // green
+                return new Color(0.2f, 1f, 0.2f, 1f);
             case GraphNodeType.Alt:
-                return new Color(1f, 0.8f, 0.2f, 1f); // yellow
+                return new Color(1f, 0.8f, 0.2f, 1f);
             default:
                 return Color.white;
         }
     }
-
-
 }

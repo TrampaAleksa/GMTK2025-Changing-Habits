@@ -25,25 +25,21 @@ public class GraphViewHandler
     {
         if (e.button == 2 && e.type == EventType.MouseDrag)
         {
-            state.Pan += e.delta / state.Zoom;
+            state.Pan += e.delta;
             e.Use();
             GUI.changed = true;
         }
     }
 
-    public Matrix4x4 BeginView(GraphEditorState state)
+    // Converts graph coordinates to screen coordinates
+    public Vector2 GraphToScreen(Vector2 graphPos, GraphEditorState state)
     {
-        Matrix4x4 oldMatrix = GUI.matrix;
-
-        Matrix4x4 translation = Matrix4x4.TRS(state.Pan, Quaternion.identity, Vector3.one);
-        Matrix4x4 scale = Matrix4x4.Scale(Vector3.one * state.Zoom);
-
-        GUI.matrix = translation * scale;
-        return oldMatrix;
+        return state.Pan + graphPos * state.Zoom;
     }
 
-    public void EndView(Matrix4x4 oldMatrix)
+    // Converts screen coordinates to graph coordinates
+    public Vector2 ScreenToGraph(Vector2 screenPos, GraphEditorState state)
     {
-        GUI.matrix = oldMatrix;
+        return (screenPos - state.Pan) / state.Zoom;
     }
 }
