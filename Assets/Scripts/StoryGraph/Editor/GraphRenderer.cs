@@ -34,12 +34,32 @@ public class GraphRenderer
                 new Vector2(NodeWidth, contentHeight)
             );
 
-            GUI.Box(rect, GUIContent.none);
+            DrawNodeBackground(rect, node);
 
             GUILayout.BeginArea(rect);
             DrawNodeContents(node, state.Graph);
             GUILayout.EndArea();
         }
+    }
+    
+    private const float BackgroundPadding = 10f;
+
+    private void DrawNodeBackground(Rect rect, GraphNodeData node)
+    {
+        var backgroundRect = new Rect(
+            rect.x - BackgroundPadding,
+            rect.y - BackgroundPadding,
+            rect.width + 2 * BackgroundPadding,
+            rect.height + 2 * BackgroundPadding
+        );
+
+        Color fillColor = GetNodeColor(node.Type);
+        Color outlineColor = Color.black;
+
+        Handles.DrawSolidRectangleWithOutline(backgroundRect, fillColor, outlineColor);
+
+        // Draw Uniy's GUI.Box (kept for border & style)
+        GUI.Box(rect, GUIContent.none);
     }
 
 
@@ -48,6 +68,7 @@ public class GraphRenderer
         DrawNodeIdField(node, graph);
         DrawNodePhaseField(node, graph);
         DrawNodeTypeField(node, graph);  
+        DrawNodeStorySceneField(node, graph);  
         DrawNodeConnections(node);
     }
 
@@ -86,6 +107,19 @@ public class GraphRenderer
         {
             Undo.RecordObject(node, "Change Node Type");
             node.Type = newType;
+            EditorUtility.SetDirty(node);
+            EditorUtility.SetDirty(graph);
+        }
+    }
+
+    private void DrawNodeStorySceneField(GraphNodeData node, GraphData graph)
+    {
+        EditorGUI.BeginChangeCheck();
+        var newPrefab = (StoryScene)EditorGUILayout.ObjectField("Scene Prefab", node.StoryScenePrefab, typeof(StoryScene), false);
+        if (EditorGUI.EndChangeCheck())
+        {
+            Undo.RecordObject(node, "Assign Scene Prefab");
+            node.StoryScenePrefab = newPrefab;
             EditorUtility.SetDirty(node);
             EditorUtility.SetDirty(graph);
         }
@@ -133,12 +167,24 @@ public class GraphRenderer
         height += lineHeight;
         // Type field
         height += lineHeight;
+        // Story Scene field
+        height += lineHeight;
         // Connections
         height += node.Connections.Count * lineHeight;
         // Padding at bottom
         height += 20f;
 
         return height;
+    }
+    
+    private Color GetNodeColor(GraphNodeType type)
+    {
+        switch (type)
+        {
+            case GraphNodeType.Main: return new Color(0.2f, 0.4f, 0.8f, 1f);  // Blue
+            case GraphNodeType.Alt:  return new Color(0.2f, 0.8f, 0.4f, 1f);  // Green
+            default:                 return new Color(0.3f, 0.3f, 0.3f, 1f);
+        }
     }
 
 }

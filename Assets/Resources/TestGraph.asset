@@ -14,10 +14,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Id: WakeUp
   Phase: 0
-  Position: {x: 128, y: 153}
+  Position: {x: 99, y: 178.79999}
+  Type: 0
   Connections:
-  - Target: {fileID: -6102957886777803289}
   - Target: {fileID: 4889152665165325990}
+    ChoiceText: 
+  - Target: {fileID: -6102957886777803289}
+    ChoiceText: 
+  StoryScenePrefab: {fileID: 0}
 --- !u!114 &-6102957886777803289
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -32,9 +36,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Id: Breakfast
   Phase: 1
-  Position: {x: 308, y: 155}
+  Position: {x: 423.99988, y: 77.39998}
+  Type: 0
   Connections:
   - Target: {fileID: -3695587556405617914}
+    ChoiceText: 
+  - Target: {fileID: 2635788233818977939}
+    ChoiceText: 
+  StoryScenePrefab: {fileID: 0}
 --- !u!114 &-3695587556405617914
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -49,8 +58,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Id: GoToWork
   Phase: 2
-  Position: {x: 494, y: 156}
-  Connections: []
+  Position: {x: 644.40015, y: 199.19994}
+  Type: 0
+  Connections:
+  - Target: {fileID: 2635788233818977939}
+    ChoiceText: 
+  StoryScenePrefab: {fileID: 0}
 --- !u!114 &11400000
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -68,6 +81,25 @@ MonoBehaviour:
   - {fileID: -6102957886777803289}
   - {fileID: -3695587556405617914}
   - {fileID: 4889152665165325990}
+  - {fileID: 2635788233818977939}
+--- !u!114 &2635788233818977939
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 984aa80f576340438b37ddc80b651b5b, type: 3}
+  m_Name: Beach
+  m_EditorClassIdentifier: 
+  Id: Beach
+  Phase: 4
+  Position: {x: 792, y: 4}
+  Type: 1
+  Connections: []
+  StoryScenePrefab: {fileID: 0}
 --- !u!114 &4889152665165325990
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -82,5 +114,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Id: ScrollPhoneInBed
   Phase: 1
-  Position: {x: 309, y: 257}
+  Position: {x: 416.39993, y: 327.8}
+  Type: 0
   Connections: []
+  StoryScenePrefab: {fileID: 0}
