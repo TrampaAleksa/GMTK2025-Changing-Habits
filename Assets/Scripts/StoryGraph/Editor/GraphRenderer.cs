@@ -15,12 +15,14 @@ public class GraphRenderer
             {
                 if (conn.Target == null) continue;
 
-                Vector2 start = node.Position + state.Pan + new Vector2(NodeWidth / 2, NodeHeight / 2);
-                Vector2 end = conn.Target.Position + state.Pan + new Vector2(NodeWidth / 2, NodeHeight / 2);
+                Vector2 start = GetNodeCenter(node, state);
+                Vector2 end = GetNodeCenter(conn.Target, state);
+
                 Handles.DrawLine(start, end);
             }
         }
     }
+
 
     public void DrawNodes(GraphEditorState state)
     {
@@ -45,6 +47,7 @@ public class GraphRenderer
     {
         DrawNodeIdField(node, graph);
         DrawNodePhaseField(node, graph);
+        DrawNodeTypeField(node, graph);  
         DrawNodeConnections(node);
     }
 
@@ -70,6 +73,19 @@ public class GraphRenderer
         {
             Undo.RecordObject(node, "Change Phase");
             node.Phase = newPhase;
+            EditorUtility.SetDirty(node);
+            EditorUtility.SetDirty(graph);
+        }
+    }
+    
+    private void DrawNodeTypeField(GraphNodeData node, GraphData graph)
+    {
+        EditorGUI.BeginChangeCheck();
+        var newType = (GraphNodeType)EditorGUILayout.EnumPopup(node.Type);
+        if (EditorGUI.EndChangeCheck())
+        {
+            Undo.RecordObject(node, "Change Node Type");
+            node.Type = newType;
             EditorUtility.SetDirty(node);
             EditorUtility.SetDirty(graph);
         }
@@ -114,6 +130,8 @@ public class GraphRenderer
         // ID field
         height += lineHeight;
         // Phase field
+        height += lineHeight;
+        // Type field
         height += lineHeight;
         // Connections
         height += node.Connections.Count * lineHeight;
