@@ -55,7 +55,7 @@ public class GraphInteractionHandler
             return;
         }
 
-        var mousePos = e.mousePosition - state.Pan;
+        var mousePos = e.mousePosition;
         GenericMenu menu = new GenericMenu();
         menu.AddItem(new GUIContent("Create Node"), false, () => CreateNode(mousePos, state));
         menu.ShowAsContext();
