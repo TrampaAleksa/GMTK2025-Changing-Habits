@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class GraphRenderer
 {
-    private const float NodeWidth = 140f;
+    private const float NodeWidth = 180f;
     private const float NodeHeight = 70f;
 
     public void DrawConnections(GraphEditorState state)
@@ -26,7 +26,12 @@ public class GraphRenderer
     {
         foreach (var node in state.Graph.Nodes)
         {
-            var rect = new Rect(node.Position + state.Pan, new Vector2(NodeWidth, NodeHeight));
+            float contentHeight = CalculateNodeHeight(node);
+            var rect = new Rect(
+                node.Position + state.Pan,
+                new Vector2(NodeWidth, contentHeight)
+            );
+
             GUI.Box(rect, GUIContent.none);
 
             GUILayout.BeginArea(rect);
@@ -34,6 +39,7 @@ public class GraphRenderer
             GUILayout.EndArea();
         }
     }
+
 
     private void DrawNodeContents(GraphNodeData node, GraphData graph)
     {
@@ -96,4 +102,22 @@ public class GraphRenderer
     {
         return node.Position + state.Pan + new Vector2(NodeWidth / 2, NodeHeight / 2);
     }
+    
+    private float CalculateNodeHeight(GraphNodeData node)
+    {
+        float lineHeight = EditorGUIUtility.singleLineHeight + 2f;
+        float height = 0f;
+
+        // ID field
+        height += lineHeight;
+        // Phase field
+        height += lineHeight;
+        // Connections
+        height += node.Connections.Count * lineHeight;
+        // Padding at bottom
+        height += 20f;
+
+        return height;
+    }
+
 }
