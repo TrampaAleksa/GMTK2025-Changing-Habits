@@ -6,4 +6,5 @@ public class GraphEditorState
     public GraphNodeData SelectedNode;
     public GraphNodeData ConnectFrom;
     public Vector2 Pan;
+    public float Zoom = 1f; 
 }
