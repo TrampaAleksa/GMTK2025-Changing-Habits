@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class GraphRenderer
 {
-    private const float NodeWidth = 180f;
+    private const float NodeWidth = 260f;
     private const float NodeHeight = 70f;
 
     public void DrawConnections(GraphEditorState state)
@@ -68,7 +68,7 @@ public class GraphRenderer
         DrawNodeIdField(node, graph);
         DrawNodePhaseField(node, graph);
         DrawNodeTypeField(node, graph);  
-        DrawNodeStorySceneField(node, graph);  
+        DrawNodeScenePrefabField(node, graph);  
         DrawNodeConnections(node);
     }
 
@@ -112,18 +112,42 @@ public class GraphRenderer
         }
     }
 
-    private void DrawNodeStorySceneField(GraphNodeData node, GraphData graph)
+    private void DrawNodeScenePrefabField(GraphNodeData node, GraphData graph)
     {
-        EditorGUI.BeginChangeCheck();
-        var newPrefab = (StoryScene)EditorGUILayout.ObjectField("Scene Prefab", node.StoryScenePrefab, typeof(StoryScene), false);
-        if (EditorGUI.EndChangeCheck())
+        GUILayout.Space(4);
+
+        using (new GUILayout.VerticalScope("box"))
         {
-            Undo.RecordObject(node, "Assign Scene Prefab");
-            node.StoryScenePrefab = newPrefab;
-            EditorUtility.SetDirty(node);
-            EditorUtility.SetDirty(graph);
+            EditorGUILayout.LabelField("Scene Prefab", EditorStyles.boldLabel);
+            GUILayout.Space(2);
+            EditorGUILayout.BeginHorizontal();
+
+            GUIStyle labelStyle = new GUIStyle(EditorStyles.helpBox)
+            {
+                alignment = TextAnchor.MiddleLeft,
+                fontStyle = FontStyle.Italic
+            };
+
+            string label = node.StoryScenePrefab != null ? node.StoryScenePrefab.name : "< None >";
+            EditorGUILayout.LabelField(label, labelStyle, GUILayout.Height(22));
+
+            if (GUILayout.Button("Select", GUILayout.Width(70), GUILayout.Height(22)))
+            {
+                StoryScenePickerWindow.Show(selected =>
+                {
+                    Undo.RecordObject(node, "Assign Scene Prefab");
+                    node.StoryScenePrefab = selected;
+                    EditorUtility.SetDirty(node);
+                    EditorUtility.SetDirty(graph);
+                });
+            }
+
+            EditorGUILayout.EndHorizontal();
         }
+        GUILayout.Space(4);
     }
+
+
 
     private void DrawNodeConnections(GraphNodeData node)
     {
@@ -168,7 +192,7 @@ public class GraphRenderer
         // Type field
         height += lineHeight;
         // Story Scene field
-        height += lineHeight;
+        height += lineHeight * 3;
         // Connections
         height += node.Connections.Count * lineHeight;
         // Padding at bottom

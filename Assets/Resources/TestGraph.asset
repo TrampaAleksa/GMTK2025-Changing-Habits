@@ -14,14 +14,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Id: WakeUp
   Phase: 0
-  Position: {x: 99, y: 178.79999}
+  Position: {x: 2.2000122, y: 151.60004}
   Type: 0
   Connections:
   - Target: {fileID: 4889152665165325990}
     ChoiceText: 
   - Target: {fileID: -6102957886777803289}
     ChoiceText: 
-  StoryScenePrefab: {fileID: 0}
+  StoryScenePrefab: {fileID: 398999128859255746, guid: 10c0bd06c53d6904fa56708a562fb9fd, type: 3}
 --- !u!114 &-6102957886777803289
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -43,7 +43,7 @@ MonoBehaviour:
     ChoiceText: 
   - Target: {fileID: 2635788233818977939}
     ChoiceText: 
-  StoryScenePrefab: {fileID: 0}
+  StoryScenePrefab: {fileID: 398999128859255746, guid: 10c0bd06c53d6904fa56708a562fb9fd, type: 3}
 --- !u!114 &-3695587556405617914
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -58,12 +58,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Id: GoToWork
   Phase: 2
-  Position: {x: 644.40015, y: 199.19994}
+  Position: {x: 822.8002, y: 308.79996}
   Type: 0
   Connections:
   - Target: {fileID: 2635788233818977939}
     ChoiceText: 
-  StoryScenePrefab: {fileID: 0}
+  StoryScenePrefab: {fileID: 398999128859255746, guid: 10c0bd06c53d6904fa56708a562fb9fd, type: 3}
 --- !u!114 &11400000
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -96,10 +96,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Id: Beach
   Phase: 4
-  Position: {x: 792, y: 4}
+  Position: {x: 1236.8002, y: 103.20003}
   Type: 1
   Connections: []
-  StoryScenePrefab: {fileID: 0}
+  StoryScenePrefab: {fileID: 398999128859255746, guid: 10c0bd06c53d6904fa56708a562fb9fd, type: 3}
 --- !u!114 &4889152665165325990
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -114,7 +114,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Id: ScrollPhoneInBed
   Phase: 1
-  Position: {x: 416.39993, y: 327.8}
+  Position: {x: 419.59995, y: 454.19998}
   Type: 0
-  Connections: []
-  StoryScenePrefab: {fileID: 0}
+  Connections:
+  - Target: {fileID: -3695587556405617914}
+    ChoiceText: 
+  StoryScenePrefab: {fileID: 398999128859255746, guid: 10c0bd06c53d6904fa56708a562fb9fd, type: 3}
