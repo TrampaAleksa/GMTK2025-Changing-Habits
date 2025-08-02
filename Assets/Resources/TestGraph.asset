@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Id: WakeUp
   Phase: 0
-  Position: {x: 2.2000122, y: 151.60004}
+  Position: {x: 91.80011, y: 157.99994}
   Type: 0
   Connections:
   - Target: {fileID: 4889152665165325990}
@@ -58,7 +58,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Id: GoToWork
   Phase: 2
-  Position: {x: 1066.7997, y: 482.40002}
+  Position: {x: 833.6568, y: 457.25714}
   Type: 0
   Connections:
   - Target: {fileID: 2635788233818977939}
@@ -82,6 +82,24 @@ MonoBehaviour:
   - {fileID: -3695587556405617914}
   - {fileID: 4889152665165325990}
   - {fileID: 2635788233818977939}
+--- !u!114 &844364534818940078
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 984aa80f576340438b37ddc80b651b5b, type: 3}
+  m_Name: Node5
+  m_EditorClassIdentifier: 
+  Id: Node5
+  Phase: 0
+  Position: {x: 1233.143, y: 523.4286}
+  Type: 0
+  Connections: []
+  StoryScenePrefab: {fileID: 0}
 --- !u!114 &2635788233818977939
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -96,7 +114,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Id: Beach
   Phase: 4
-  Position: {x: 1416.801, y: 117.199974}
+  Position: {x: 1123.7737, y: 179.77144}
   Type: 1
   Connections: []
   StoryScenePrefab: {fileID: 398999128859255746, guid: 10c0bd06c53d6904fa56708a562fb9fd, type: 3}
