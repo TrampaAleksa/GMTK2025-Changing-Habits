@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class GraphRenderer
 {
-    private const float NodeBaseWidth = 280f;
+    private const float NodeBaseWidth = 200f;
 
     private GraphViewHandler _viewHandler;
 
@@ -42,7 +42,7 @@ public class GraphRenderer
 
             var rect = new Rect(drawPos, drawSize);
 
-            DrawNodeBackground(rect, node);
+            DrawNodeBackground(rect, node, state.Zoom);
 
             GUI.BeginGroup(rect);
             DrawNodeContentsManual(node, state.Graph, rect, state.Zoom);
@@ -50,14 +50,23 @@ public class GraphRenderer
         }
     }
 
-    private void DrawNodeBackground(Rect rect, GraphNodeData node)
+    private void DrawNodeBackground(Rect rect, GraphNodeData node, float zoom)
     {
-        Color fillColor = GetNodeColor(node.Phase);
-        Color outlineColor = fillColor * 0.7f;
-        outlineColor.a = 1f;
+        Handles.DrawSolidRectangleWithOutline(rect, new Color(0.15f, 0.15f, 0.15f, 1f), Color.black);
 
-        Handles.DrawSolidRectangleWithOutline(rect, fillColor, outlineColor);
+        float tagSize = 28f * zoom;
+        float margin = 4f * zoom;
+
+        float tagX = rect.x + rect.width - tagSize - margin;
+        float tagY = rect.y + margin;
+
+        Rect tagRect = new Rect(tagX, tagY, tagSize, tagSize);
+
+        Color tagColor = GetNodeColor(node.Phase);
+        Handles.DrawSolidRectangleWithOutline(tagRect, tagColor, Color.black);
     }
+
+
 
     private void DrawNodeContentsManual(GraphNodeData node, GraphData graph, Rect rect, float zoom)
     {
