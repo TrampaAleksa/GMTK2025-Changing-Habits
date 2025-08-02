@@ -74,8 +74,14 @@ public class GraphRenderer
 
     private void DrawNodeIdField(GraphNodeData node, GraphData graph)
     {
+        var style = new GUIStyle(EditorStyles.textField)
+        {
+            fontSize = 20,
+            fontStyle = FontStyle.Bold
+        };
+
         EditorGUI.BeginChangeCheck();
-        string newId = EditorGUILayout.TextField(node.Id);
+        string newId = EditorGUILayout.TextField(node.Id, style, GUILayout.Height(24));
         if (EditorGUI.EndChangeCheck())
         {
             Undo.RecordObject(node, "Rename Node");
@@ -85,6 +91,7 @@ public class GraphRenderer
             EditorUtility.SetDirty(graph);
         }
     }
+
 
     private void DrawNodePhaseField(GraphNodeData node, GraphData graph)
     {
@@ -186,7 +193,7 @@ public class GraphRenderer
         float height = 0f;
 
         // ID field
-        height += lineHeight;
+        height += lineHeight * 2;
         // Phase field
         height += lineHeight;
         // Type field
