@@ -134,12 +134,53 @@ public class GraphEditorWindow : EditorWindow
 
         if (e.type == EventType.MouseDown && e.button == 1)
         {
-            var mousePos = e.mousePosition - pan;
+            var mousePos = e.mousePosition;
+
+            // Try to find a connection close to the click
+            const float lineClickThreshold = 10f;
+            foreach (var node in graph.Nodes)
+            {
+                for (int c = node.Connections.Count - 1; c >= 0; c--)
+                {
+                    var conn = node.Connections[c];
+                    if (conn.Target == null) continue;
+
+                    Vector2 start = node.Position + pan + new Vector2(NodeWidth / 2, NodeHeight / 2);
+                    Vector2 end = conn.Target.Position + pan + new Vector2(NodeWidth / 2, NodeHeight / 2);
+
+                    if (IsPointNearLine(mousePos, start, end, lineClickThreshold))
+                    {
+                        // Remove the connection
+                        Undo.RecordObject(node, "Remove Connection");
+                        node.Connections.RemoveAt(c);
+                        EditorUtility.SetDirty(node);
+                        GUI.changed = true;
+                        e.Use();
+                        return; // Exit, we handled the click
+                    }
+                }
+            }
+
+            // If no line was hit, show context menu (create node)
+            var localPos = mousePos - pan;
             GenericMenu menu = new GenericMenu();
-            menu.AddItem(new GUIContent("Create Node"), false, () => CreateNode(mousePos));
+            menu.AddItem(new GUIContent("Create Node"), false, () => CreateNode(localPos));
             menu.ShowAsContext();
         }
+
     }
+    
+    private bool IsPointNearLine(Vector2 point, Vector2 a, Vector2 b, float maxDistance)
+    {
+        // Closest point on line segment formula
+        Vector2 ab = b - a;
+        float t = Vector2.Dot(point - a, ab) / ab.sqrMagnitude;
+        t = Mathf.Clamp01(t);
+        Vector2 closest = a + t * ab;
+        float distance = Vector2.Distance(point, closest);
+        return distance <= maxDistance;
+    }
+
 
     private GraphNodeData GetNodeAtPosition(Vector2 pos)
     {
