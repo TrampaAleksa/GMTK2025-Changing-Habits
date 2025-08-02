@@ -9,11 +9,11 @@ public class GraphNodeData : ScriptableObject
     public Vector2 Position;
     public GraphNodeType Type;
     public List<GraphConnection> Connections = new List<GraphConnection>();
+    public StoryScene StoryScenePrefab;
 }
 
 public enum GraphNodeType
 {
     Main,
-    Alt,
-    End
+    Alt
 }

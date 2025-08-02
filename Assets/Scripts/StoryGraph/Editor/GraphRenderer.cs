@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class GraphRenderer
 {
-    private const float NodeWidth = 180f;
+    private const float NodeWidth = 260f;
     private const float NodeHeight = 70f;
 
     public void DrawConnections(GraphEditorState state)
@@ -34,12 +34,32 @@ public class GraphRenderer
                 new Vector2(NodeWidth, contentHeight)
             );
 
-            GUI.Box(rect, GUIContent.none);
+            DrawNodeBackground(rect, node);
 
             GUILayout.BeginArea(rect);
             DrawNodeContents(node, state.Graph);
             GUILayout.EndArea();
         }
+    }
+    
+    private const float BackgroundPadding = 10f;
+
+    private void DrawNodeBackground(Rect rect, GraphNodeData node)
+    {
+        var backgroundRect = new Rect(
+            rect.x - BackgroundPadding,
+            rect.y - BackgroundPadding,
+            rect.width + 2 * BackgroundPadding,
+            rect.height + 2 * BackgroundPadding
+        );
+
+        Color fillColor = GetNodeColor(node.Type);
+        Color outlineColor = Color.black;
+
+        Handles.DrawSolidRectangleWithOutline(backgroundRect, fillColor, outlineColor);
+
+        // Draw Uniy's GUI.Box (kept for border & style)
+        GUI.Box(rect, GUIContent.none);
     }
 
 
@@ -48,6 +68,7 @@ public class GraphRenderer
         DrawNodeIdField(node, graph);
         DrawNodePhaseField(node, graph);
         DrawNodeTypeField(node, graph);  
+        DrawNodeScenePrefabField(node, graph);  
         DrawNodeConnections(node);
     }
 
@@ -91,6 +112,43 @@ public class GraphRenderer
         }
     }
 
+    private void DrawNodeScenePrefabField(GraphNodeData node, GraphData graph)
+    {
+        GUILayout.Space(4);
+
+        using (new GUILayout.VerticalScope("box"))
+        {
+            EditorGUILayout.LabelField("Scene Prefab", EditorStyles.boldLabel);
+            GUILayout.Space(2);
+            EditorGUILayout.BeginHorizontal();
+
+            GUIStyle labelStyle = new GUIStyle(EditorStyles.helpBox)
+            {
+                alignment = TextAnchor.MiddleLeft,
+                fontStyle = FontStyle.Italic
+            };
+
+            string label = node.StoryScenePrefab != null ? node.StoryScenePrefab.name : "< None >";
+            EditorGUILayout.LabelField(label, labelStyle, GUILayout.Height(22));
+
+            if (GUILayout.Button("Select", GUILayout.Width(70), GUILayout.Height(22)))
+            {
+                StoryScenePickerWindow.Show(selected =>
+                {
+                    Undo.RecordObject(node, "Assign Scene Prefab");
+                    node.StoryScenePrefab = selected;
+                    EditorUtility.SetDirty(node);
+                    EditorUtility.SetDirty(graph);
+                });
+            }
+
+            EditorGUILayout.EndHorizontal();
+        }
+        GUILayout.Space(4);
+    }
+
+
+
     private void DrawNodeConnections(GraphNodeData node)
     {
         for (int c = node.Connections.Count - 1; c >= 0; c--)
@@ -133,12 +191,24 @@ public class GraphRenderer
         height += lineHeight;
         // Type field
         height += lineHeight;
+        // Story Scene field
+        height += lineHeight * 3;
         // Connections
         height += node.Connections.Count * lineHeight;
         // Padding at bottom
         height += 20f;
 
         return height;
+    }
+    
+    private Color GetNodeColor(GraphNodeType type)
+    {
+        switch (type)
+        {
+            case GraphNodeType.Main: return new Color(0.2f, 0.4f, 0.8f, 1f);  // Blue
+            case GraphNodeType.Alt:  return new Color(0.2f, 0.8f, 0.4f, 1f);  // Green
+            default:                 return new Color(0.3f, 0.3f, 0.3f, 1f);
+        }
     }
 
 }
