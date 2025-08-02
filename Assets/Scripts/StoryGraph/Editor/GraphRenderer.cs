@@ -95,13 +95,16 @@ public class GraphRenderer
 
     public Rect GetNodeRect(GraphNodeData node, GraphEditorState state)
     {
-        return new Rect(node.Position + state.Pan, new Vector2(NodeWidth, NodeHeight));
+        float contentHeight = CalculateNodeHeight(node);
+        return new Rect(node.Position + state.Pan, new Vector2(NodeWidth, contentHeight));
     }
 
     public Vector2 GetNodeCenter(GraphNodeData node, GraphEditorState state)
     {
-        return node.Position + state.Pan + new Vector2(NodeWidth / 2, NodeHeight / 2);
+        float contentHeight = CalculateNodeHeight(node);
+        return node.Position + state.Pan + new Vector2(NodeWidth / 2, contentHeight / 2);
     }
+
     
     private float CalculateNodeHeight(GraphNodeData node)
     {
