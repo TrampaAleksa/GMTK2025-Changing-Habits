@@ -36,7 +36,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Id: Breakfast
   Phase: 1
-  Position: {x: 423.99988, y: 77.39998}
+  Position: {x: 637.6001, y: 26.999908}
   Type: 0
   Connections:
   - Target: {fileID: -3695587556405617914}
@@ -58,7 +58,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Id: GoToWork
   Phase: 2
-  Position: {x: 822.8002, y: 308.79996}
+  Position: {x: 1066.7997, y: 482.40002}
   Type: 0
   Connections:
   - Target: {fileID: 2635788233818977939}
@@ -96,7 +96,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Id: Beach
   Phase: 4
-  Position: {x: 1236.8002, y: 103.20003}
+  Position: {x: 1416.801, y: 117.199974}
   Type: 1
   Connections: []
   StoryScenePrefab: {fileID: 398999128859255746, guid: 10c0bd06c53d6904fa56708a562fb9fd, type: 3}
@@ -114,9 +114,27 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Id: ScrollPhoneInBed
   Phase: 1
-  Position: {x: 419.59995, y: 454.19998}
+  Position: {x: 363.5999, y: 426.19998}
   Type: 0
   Connections:
   - Target: {fileID: -3695587556405617914}
     ChoiceText: 
   StoryScenePrefab: {fileID: 398999128859255746, guid: 10c0bd06c53d6904fa56708a562fb9fd, type: 3}
+--- !u!114 &6118659646328288116
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 984aa80f576340438b37ddc80b651b5b, type: 3}
+  m_Name: Node5
+  m_EditorClassIdentifier: 
+  Id: Node5
+  Phase: 0
+  Position: {x: 1784.1632, y: 361.87762}
+  Type: 0
+  Connections: []
+  StoryScenePrefab: {fileID: 0}

@@ -5,21 +5,29 @@ public class GraphInteractionHandler
 {
     private const float LineClickThreshold = 10f;
 
-    public void ProcessEvents(Event e, GraphEditorState state, GraphRenderer renderer)
+    // Converts screen coordinates (mouse) into graph-space coordinates
+    private Vector2 ScreenToGraph(Vector2 screenPos, GraphEditorState state, Vector2 windowSize)
+    {
+        // Currently pivot is top-left (0,0) because BeginView does not offset by window center
+        return (screenPos - state.Pan) / state.Zoom;
+    }
+
+    public void ProcessEvents(Event e, GraphEditorState state, GraphRenderer renderer, Vector2 windowSize)
     {
         if (e.type == EventType.MouseDown && e.button == 0)
-            HandleLeftClick(e, state, renderer);
+            HandleLeftClick(e, state, renderer, windowSize);
 
         if (e.type == EventType.MouseDrag && e.button == 0 && state.SelectedNode != null && !e.control)
             HandleNodeDrag(e, state);
 
         if (e.type == EventType.MouseDown && e.button == 1)
-            HandleRightClick(e, state, renderer);
+            HandleRightClick(e, state, renderer, windowSize);
     }
 
-    private void HandleLeftClick(Event e, GraphEditorState state, GraphRenderer renderer)
+    private void HandleLeftClick(Event e, GraphEditorState state, GraphRenderer renderer, Vector2 windowSize)
     {
-        var clickedNode = GetNodeAtPosition(e.mousePosition, state, renderer);
+        Vector2 graphPos = ScreenToGraph(e.mousePosition, state, windowSize);
+        var clickedNode = GetNodeAtPosition(graphPos, state, renderer);
         if (clickedNode == null)
             return;
 
@@ -42,22 +50,24 @@ public class GraphInteractionHandler
     private void HandleNodeDrag(Event e, GraphEditorState state)
     {
         Undo.RecordObject(state.SelectedNode, "Move Node");
-        state.SelectedNode.Position += e.delta;
+        // delta is in screen coords, so apply directly
+        state.SelectedNode.Position += e.delta / state.Zoom;
         GUI.changed = true;
     }
 
-    private void HandleRightClick(Event e, GraphEditorState state, GraphRenderer renderer)
+    private void HandleRightClick(Event e, GraphEditorState state, GraphRenderer renderer, Vector2 windowSize)
     {
-        if (TryRemoveConnectionByClick(e.mousePosition, state, renderer))
+        // Try to remove connection first
+        if (TryRemoveConnectionByClick(e.mousePosition, state, renderer, windowSize))
         {
             GUI.changed = true;
             e.Use();
             return;
         }
 
-        var mousePos = e.mousePosition;
+        Vector2 graphMousePos = ScreenToGraph(e.mousePosition, state, windowSize);
         GenericMenu menu = new GenericMenu();
-        menu.AddItem(new GUIContent("Create Node"), false, () => CreateNode(mousePos, state));
+        menu.AddItem(new GUIContent("Create Node"), false, () => CreateNode(graphMousePos, state));
         menu.ShowAsContext();
     }
 
@@ -71,8 +81,10 @@ public class GraphInteractionHandler
         }
     }
 
-    private bool TryRemoveConnectionByClick(Vector2 clickPos, GraphEditorState state, GraphRenderer renderer)
+    private bool TryRemoveConnectionByClick(Vector2 clickPos, GraphEditorState state, GraphRenderer renderer, Vector2 windowSize)
     {
+        Vector2 graphPos = ScreenToGraph(clickPos, state, windowSize);
+
         foreach (var node in state.Graph.Nodes)
         {
             for (int c = node.Connections.Count - 1; c >= 0; c--)
@@ -83,7 +95,7 @@ public class GraphInteractionHandler
                 Vector2 start = renderer.GetNodeCenter(node, state);
                 Vector2 end = renderer.GetNodeCenter(conn.Target, state);
 
-                if (IsPointNearLine(clickPos, start, end, LineClickThreshold))
+                if (IsPointNearLine(graphPos, start, end, LineClickThreshold))
                 {
                     Undo.RecordObject(node, "Remove Connection");
                     node.Connections.RemoveAt(c);
@@ -95,12 +107,12 @@ public class GraphInteractionHandler
         return false;
     }
 
-    private GraphNodeData GetNodeAtPosition(Vector2 pos, GraphEditorState state, GraphRenderer renderer)
+    private GraphNodeData GetNodeAtPosition(Vector2 graphPos, GraphEditorState state, GraphRenderer renderer)
     {
         foreach (var node in state.Graph.Nodes)
         {
             var rect = renderer.GetNodeRect(node, state);
-            if (rect.Contains(pos))
+            if (rect.Contains(graphPos))
                 return node;
         }
         return null;

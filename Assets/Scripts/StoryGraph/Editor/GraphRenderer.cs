@@ -8,12 +8,14 @@ public class GraphRenderer
 
     public void DrawConnections(GraphEditorState state)
     {
-        Handles.color = Color.white;
         foreach (var node in state.Graph.Nodes)
         {
             foreach (var conn in node.Connections)
             {
-                if (conn.Target == null) continue;
+                if (conn.Target == null)
+                    continue;
+
+                Handles.color = GetConnectionColor(conn.Target);
 
                 Vector2 start = GetNodeCenter(node, state);
                 Vector2 end = GetNodeCenter(conn.Target, state);
@@ -21,7 +23,11 @@ public class GraphRenderer
                 Handles.DrawLine(start, end);
             }
         }
+        
+        // Reset color after drawing
+        Handles.color = Color.white;
     }
+
 
 
     public void DrawNodes(GraphEditorState state)
@@ -53,7 +59,7 @@ public class GraphRenderer
             rect.height + 2 * BackgroundPadding
         );
 
-        Color fillColor = GetNodeColor(node.Type);
+        Color fillColor = GetNodeColor(node.Phase);
         Color outlineColor = Color.black;
 
         Handles.DrawSolidRectangleWithOutline(backgroundRect, fillColor, outlineColor);
@@ -208,14 +214,32 @@ public class GraphRenderer
         return height;
     }
     
-    private Color GetNodeColor(GraphNodeType type)
+    private Color GetNodeColor(TimeOfDayPhase phase)
     {
-        switch (type)
+        switch (phase)
         {
-            case GraphNodeType.Main: return new Color(0.2f, 0.4f, 0.8f, 1f);  // Blue
-            case GraphNodeType.Alt:  return new Color(0.2f, 0.8f, 0.4f, 1f);  // Green
-            default:                 return new Color(0.3f, 0.3f, 0.3f, 1f);
+            case TimeOfDayPhase.Dawn:    return new Color(0.9f, 0.7f, 0.3f, 1f);
+            case TimeOfDayPhase.Morning: return new Color(0.5f, 0.8f, 1f, 1f);
+            case TimeOfDayPhase.Noon:    return new Color(0.9f, 0.9f, 0.5f, 1f);
+            case TimeOfDayPhase.Afternoon: return new Color(0.9f, 0.6f, 0.4f, 1f);
+            case TimeOfDayPhase.Evening: return new Color(0.7f, 0.5f, 0.8f, 1f);
+            case TimeOfDayPhase.Night:   return new Color(0.3f, 0.3f, 0.7f, 1f);
+            default:                     return new Color(0.4f, 0.4f, 0.4f, 1f);
         }
     }
+
+    private Color GetConnectionColor(GraphNodeData targetNode)
+    {
+        switch (targetNode.Type)
+        {
+            case GraphNodeType.Main:
+                return new Color(0.2f, 1f, 0.2f, 1f); // green
+            case GraphNodeType.Alt:
+                return new Color(1f, 0.8f, 0.2f, 1f); // yellow
+            default:
+                return Color.white;
+        }
+    }
+
 
 }

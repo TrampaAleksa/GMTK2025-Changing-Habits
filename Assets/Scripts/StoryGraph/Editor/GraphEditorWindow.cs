@@ -30,7 +30,7 @@ public class GraphEditorWindow : EditorWindow
 
         viewHandler.EndView(oldMatrix);
 
-        interaction.ProcessEvents(Event.current, state, renderer);
+        interaction.ProcessEvents(Event.current, state, renderer, position.size);
 
         if (GUI.changed)
             Repaint();
